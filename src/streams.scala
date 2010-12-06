@@ -97,11 +97,20 @@ object streams {
 	  /* Testing Exercise 1 */
 	  print("ln2 = "); ln2 take 10 print;
 	  println;
-	  
+	   
 	  print("ln2 Euler = "); ln2Euler take 10 print;
 	  println;
 	   
-	  print("ln2 Tableau = "); ln2Tableau take 10 toString;
+	  //calculate the number of iterations needed to get the 10e decimal of ln(2) using Euler formula  
+	  def isGood(n: Int, s: Stream[Double]) {	 	 
+	 	  if (Math.abs(s.head - s.tail.head) < 0.000000001)
+	 	 	  println("Needs " + n + " iterations to get it.")
+	 	  else isGood(n + 1, s.tail)
+	  }
+	  
+	  isGood(1, ln2Euler)
+
+	  print("ln2 Tableau = "); ln2Tableau take 10 print;
 	  println;
 	   
 	  /* Testing Exercise 2 */
@@ -189,7 +198,7 @@ object solver {
         	a1.setValue(root)
         	a2.setValue(root)
         }
-        case _                             => println("Nothing happens!")
+        case _                             =>
       }
     }
     def dropValue {
@@ -292,12 +301,16 @@ object solver {
      * Exercise 2
      */
 
-    def square(that: Quantity) {
-    	Square(this, that)
+    def square: Quantity = {
+    	val result = new Quantity
+    	Square(this, result)
+    	result
     }
     
-    def sqrt(that: Quantity) {
-    	Square(that, this);
+    def sqrt: Quantity = {
+    	val result = new Quantity
+    	Square(result, this)
+    	result
     }
 
 
@@ -370,5 +383,48 @@ object solver {
     }
     
     squareExample
+    
+    def opsExample {
+    	println("Ops example");
+    	{
+    		val a, b = new Quantity
+    		val c = a + b
+    		Probe("1 + 2", c)
+    		a setValue 1
+    		b setValue 2
+    	}
+    	
+    	{
+    		val a, b, c = new Quantity
+    		c === a + b
+    		Probe("5 + 6", c)
+    		a setValue 5
+    		b setValue 6
+    	}
+    	
+    	{
+    		val a, b = new Quantity
+    		val c = a * b
+    		Probe("123 * 456", c)
+    		a setValue 123
+    		b setValue 456
+    	}
+    	
+    	{
+    		val a = new Quantity
+    		val b = a sqrt;
+    		Probe("sqrt(121)", b)
+    		a setValue 121
+    	}
+    	
+    	{
+    		val a = new Quantity
+    		val b = a square;
+    		Probe("7^2", b)
+    		a setValue 7
+    	}
+    }
+    
+    opsExample
   }
 }
