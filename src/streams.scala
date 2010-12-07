@@ -50,19 +50,16 @@ object streams {
   }
 
   def intPairs: Stream[(Int, Int)] = {
-	  for (j <- Stream.from(0); i <- Stream.from(0))
-		  yield (i, j)
+	  for(i <- Stream.from(0); x <- Stream.from(0).take(i + 1))
+		  yield (x, i - x)
   }
 
   def intPairs2: Stream[(Int, Int)] = {
-	  def intPairs20(m: Int, n: Int): Stream[(Int, Int)] = {
-	 	  Stream.cons((m, n), intPairs20(m + 1, n))
+	  def intPairs20(n: Int, i: Int, j: Int): Stream[(Int, Int)] = j match {
+		  case 0 => Stream.cons((i, 0), intPairs20(n + 1, 0,     n + 1))
+		  case _ => Stream.cons((i, j), intPairs20(n,     i + 1, j - 1))
 	  }
-	  def intPairs21(n: Int): Stream[Stream[(Int, Int)]] = {
-	 	  Stream.cons(intPairs20(0, n), intPairs21(n + 1))
-	  }
-	   
-	  intPairs21(0).flatten;
+	  intPairs20(0, 0, 0)
   }
 
 
