@@ -99,15 +99,21 @@ object streams {
 	  println;
 	   
 	  //calculate the number of iterations needed to get the 10e decimal of ln(2) using Euler formula  
-	  def isGood(n: Int, s: Stream[Double]) {	 	 
-	 	  if (Math.abs(s.head - s.tail.head) < 0.000000001)
-	 	 	  println("Needs " + n + " iterations to get it.")
-	 	  else isGood(n + 1, s.tail)
+	  def isGood(n: Int, s: Stream[Double], method: String) {	 	 
+		  val p = Math.round(s.head      * 1000000000)
+		  val c = Math.round(s.tail.head * 1000000000)
+	 	  if (p > 0 && Math.abs(p - c) < 1) {
+	 	 	  println("Needs " + n + " iterations to get a good approximation with " + method)
+			  return
+		  }
+	 	  isGood(n + 1, s.tail, method)
 	  }
 	  
-	  isGood(1, ln2Euler)
+	  (2 to 5) foreach(x => isGood(1, ln2Tableau apply x, "ln2Tableau(" + x + ")"))
+	  isGood(1, ln2Euler, "ln2Euler") // it takes 1277 iterations to get a good approximation with Euler
+	  // We couldn't compute the number of iterations required for the standard 'ln2' as we run out of memory
 
-	  print("ln2 Tableau = "); ln2Tableau take 10 print;
+	  print("ln2 Tableau = "); ln2Tableau take 3 map(x => x take 10) print;
 	  println;
 	   
 	  /* Testing Exercise 2 */
