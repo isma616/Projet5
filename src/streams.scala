@@ -100,9 +100,9 @@ object streams {
 	   
 	  //calculate the number of iterations needed to get the 10e decimal of ln(2) using Euler formula  
 	  def numIters(n: Int, s: Stream[Double], method: String) {	 	 
-		  val p = Math.round(s.head      * 1000000000)
-		  val c = Math.round(s.tail.head * 1000000000)
-	 	  if (p > 0 && Math.abs(p - c) < 1) {
+		  val p = math.round(s.head      * 1000000000)
+		  val c = math.round(s.tail.head * 1000000000)
+	 	  if (p > 0 && math.abs(p - c) < 1) {
 	 	 	  println("Needs " + n + " iterations to get a good approximation with " + method)
 			  return
 		  }
@@ -216,7 +216,7 @@ object solver {
         case (Some(x1), _       , Some(r)) => a2.setValue(r / x1, this)
         case (_       , Some(x2), Some(r)) => a1.setValue(r / x2, this)
         case (_       , _       , Some(r)) => if(a1 == a2) {
-        	val root = Math.sqrt(r)
+        	val root = math.sqrt(r)
         	a1.setValue(root)
         	a2.setValue(root)
         }
