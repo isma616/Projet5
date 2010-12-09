@@ -1,4 +1,4 @@
-//package project5
+import annotation.tailrec
 
 /**
  * Premiere Partie
@@ -29,7 +29,10 @@ object streams {
    */
 
   def ln2Summands(n: Int): Stream[Double] = {
-	  Stream.cons(1.0 / n, ln2Summands(n + 1) map {x => -x})
+     def ln2Summands0(n: Int, sign: Double): Stream[Double] = {
+       Stream.cons(sign * (1.0 / n), ln2Summands0(n + 1, -sign))
+     }
+     ln2Summands0(n, 1.0)
   }
 
   val ln2 = partialSums(ln2Summands(1))
@@ -89,7 +92,33 @@ object streams {
 	  allCountStreams0(Stream.cons(1, Stream.empty))
   }
 
+  def getNthDigit(d: Double, i: Int): Int = {
+	  if (i > 1) {
+	    getNthDigit(10.0 * (d - math.floor(d)), i - 1)
+	  } else {
+	    math.ceil(d).asInstanceOf[Int]
+	  }
+  }
+
+  def equalUpToNthDigit(d1: Double, d2: Double, i: Int): Boolean = {
+	  if (i > 0) {
+	    if(math.ceil(d1).asInstanceOf[Int] != math.ceil(d2).asInstanceOf[Int]) return false
+	    equalUpToNthDigit(10.0 * (d1 - math.floor(d1)), 10.0 * (d2 - math.floor(d2)), i - 1)
+	  } else {
+	    math.ceil(d1).asInstanceOf[Int] == math.ceil(d2).asInstanceOf[Int]
+	  }
+  }
+
   def main(args: Array[String]) {
+
+	  // Testing getNthDigit
+	  /*
+	  val pi = 3.14159
+	  println(getNthDigit(pi, 5))
+
+	  val momsweight = 1024.123456789
+	  println(getNthDigit(momsweight, 5))
+	  */
 	
 	  /* Testing Exercise 1 */
 	  print("ln2 = "); ln2 take 10 print;
@@ -97,44 +126,56 @@ object streams {
 	   
 	  print("ln2 Euler = "); ln2Euler take 10 print;
 	  println;
-	   
-	  //calculate the number of iterations needed to get the 10e decimal of ln(2) using Euler formula  
-	  def numIters(n: Int, s: Stream[Double], method: String) {	 	 
-		  val p = math.round(s.head      * 1000000000)
-		  val c = math.round(s.tail.head * 1000000000)
-	 	  if (p > 0 && math.abs(p - c) < 1) {
-	 	 	  println("Needs " + n + " iterations to get a good approximation with " + method)
-			  return
-		  }
-	 	  numIters(n + 1, s.tail, method)
-	  }
-	  
-	  (2 to 5) foreach(x => numIters(1, ln2Tableau apply x, "ln2Tableau(" + x + ")"))
-	  // ln2Tableau(2) requires 67 iterations
-	  // ln2Tableau(3) requires 17 iterations
-	  // ln2Tableau(4) requires 7 iterations
-	  // ln2Tableau(5) requires 1 iteration
-
-	  numIters(1, ln2Euler, "ln2Euler")
-	  // it takes 1277 iterations to get a good approximation with Euler
-
-	  // with the regular ln2, the values (of Math.abs(p - c)) look like:
-	  // 500000000 333333333 250000000 200000000 166666666 142857143 125000000 111111111 100000000
-	  // 
-	  // Which is equal to 500000000 * 1/(n + 1), hence we must satisfy the condition:
-	  //
-	  // 500000000 * 1/(n + 1) < 1
-	  // 1/(n + 1) < 1 / 500000000
-	  // 1 < (n + 1) / 500000000
-	  // 500000000 < (n + 1)
-	  // n > 500000001
-	  // 
-	  // Hence, it takes approximately 500000001 iterations to get a good approximation with ln2
-
 
 	  print("ln2 Tableau = "); ln2Tableau take 3 map(x => x take 10) print;
-	  println;
+	  println; 
 	   
+	  //calculate the number of iterations needed to get the 10e decimal of ln(2) using Euler formula  
+	  def numIters(s: Stream[Double]): Int = numIters0(s, s.head, 1)
+
+	  @tailrec def numIters0(s: Stream[Double], c: Double, n: Int): Int = {
+		  val c2 = s apply n
+		  //println(n + " (" + c + "," + c2 + ")")
+		  if (equalUpToNthDigit(c, c2, 10))
+			  n
+		  else
+			  numIters0(s, c2, n + 1)
+	  }
+	  
+	  (2 to 5) foreach(x => {
+	    val n = numIters(ln2Tableau apply x)
+	    println("Needs " + n + " iterations to get a good approximation with lnTableau(" + x + ")")
+	  })
+	  // ln2Tableau(2) requires 72 iterations
+	  // ln2Tableau(3) requires 18 iterations
+	  // ln2Tableau(4) requires 8 iterations
+	  // ln2Tableau(5) requires 1 iteration
+
+          {
+	    val n = numIters(ln2Euler)
+	    println("Needs " + n + " iterations to get a good approximation with ln2Euler")
+          }
+	  // it takes 1460 iterations to get a good approximation with Euler
+
+	  // As for the number of steps required for the original ln2, we have a sum of terms of the form
+	  // |x| = 1/n
+	  // So, once we have 1/n < 10^-10, the 10th decimal will remain unchanged, no matter how many
+	  // terms are added.
+	  // Which gives us:
+	  // 1/n < 10^-10
+	  // 1 < n * 10^-10
+	  // n > 1 / 10^-10
+	  // n > 10^10
+	  // 
+	  // Hence, we need at least 10^10 iterations to have an estimate precise to the tenth decimal.
+	  // We have tried many methods to compute it from this program, but everything has failed.
+	  // Iterators don't seem to prevent the memory from filling up, nor do any combination of @tailrec
+	  // with pure Streams.
+	  // We also tried with a simple terminal recursive function (no Streams, no Iterators), which would've
+	  // eventually completed if 'n' hadn't wrapped around at 2^31... and we didn't feel like running it again
+	  // with longs.
+	  // So, well, for this time, math will have to do.
+
 	  /* Testing Exercise 2 */
 	  intPairs  take 20 print;
 	  println;
