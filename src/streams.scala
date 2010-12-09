@@ -99,19 +99,38 @@ object streams {
 	  println;
 	   
 	  //calculate the number of iterations needed to get the 10e decimal of ln(2) using Euler formula  
-	  def isGood(n: Int, s: Stream[Double], method: String) {	 	 
+	  def numIters(n: Int, s: Stream[Double], method: String) {	 	 
 		  val p = Math.round(s.head      * 1000000000)
 		  val c = Math.round(s.tail.head * 1000000000)
 	 	  if (p > 0 && Math.abs(p - c) < 1) {
 	 	 	  println("Needs " + n + " iterations to get a good approximation with " + method)
 			  return
 		  }
-	 	  isGood(n + 1, s.tail, method)
+	 	  numIters(n + 1, s.tail, method)
 	  }
 	  
-	  (2 to 5) foreach(x => isGood(1, ln2Tableau apply x, "ln2Tableau(" + x + ")"))
-	  isGood(1, ln2Euler, "ln2Euler") // it takes 1277 iterations to get a good approximation with Euler
-	  // We couldn't compute the number of iterations required for the standard 'ln2' as we run out of memory
+	  (2 to 5) foreach(x => numIters(1, ln2Tableau apply x, "ln2Tableau(" + x + ")"))
+	  // ln2Tableau(2) requires 67 iterations
+	  // ln2Tableau(3) requires 17 iterations
+	  // ln2Tableau(4) requires 7 iterations
+	  // ln2Tableau(5) requires 1 iteration
+
+	  numIters(1, ln2Euler, "ln2Euler")
+	  // it takes 1277 iterations to get a good approximation with Euler
+
+	  // with the regular ln2, the values (of Math.abs(p - c)) look like:
+	  // 500000000 333333333 250000000 200000000 166666666 142857143 125000000 111111111 100000000
+	  // 
+	  // Which is equal to 500000000 * 1/(n + 1), hence we must satisfy the condition:
+	  //
+	  // 500000000 * 1/(n + 1) < 1
+	  // 1/(n + 1) < 1 / 500000000
+	  // 1 < (n + 1) / 500000000
+	  // 500000000 < (n + 1)
+	  // n > 500000001
+	  // 
+	  // Hence, it takes approximately 500000001 iterations to get a good approximation with ln2
+
 
 	  print("ln2 Tableau = "); ln2Tableau take 3 map(x => x take 10) print;
 	  println;
