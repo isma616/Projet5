@@ -168,13 +168,22 @@ object streams {
 	  // n > 10^10
 	  // 
 	  // Hence, we need at least 10^10 iterations to have an estimate precise to the tenth decimal.
-	  // We have tried many methods to compute it from this program, but everything has failed.
-	  // Iterators don't seem to prevent the memory from filling up, nor do any combination of @tailrec
-	  // with pure Streams.
-	  // We also tried with a simple terminal recursive function (no Streams, no Iterators), which would've
-	  // eventually completed if 'n' hadn't wrapped around at 2^31... and we didn't feel like running it again
-	  // with longs.
-	  // So, well, for this time, math will have to do.
+	  //
+	  // The simulation below gave an exact number: with 12'755'552'203 iterations, we have an estimate
+	  // precise to the tenth decimal
+
+	  def numItersLn(c: Double, sign: Double, n: Long) {
+	    val c2 = c + (sign * (1.0 / n))
+	    if(n % 50000000 == 0) println("n = " + n + ", error = " + (c2 - c))
+	    if(equalUpToNthDigit(c, c2, 10)) {
+	      println("Needs " + n + " iterations to get a good approx with ln2")
+	      return
+	    }
+	    numItersLn(c2, -sign, n + 1)
+	  }
+	  // Uncomment the following line to run the simulation. Beware: it took almost an hour
+	  // on my Core2 Duo 2.2Ghz, however it runs in constant memory.
+	  //numItersLn(0.0, 1.0, 1)
 
 	  /* Testing Exercise 2 */
 	  intPairs  take 20 print;
